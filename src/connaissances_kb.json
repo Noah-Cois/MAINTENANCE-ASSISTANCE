@@ -1,0 +1,17 @@
+[
+  {
+    "id": "KB-NET-01",
+    "titre": "Résolution des problèmes de connexion Wi-Fi et réseau lent",
+    "contenu": "1. Redémarrer l'ordinateur et la borne Wi-Fi. 2. Vérifier l'adresse IP avec ipconfig /renew. 3. Si le problème persiste, contacter l'infrastructure réseau."
+  },
+  {
+    "id": "KB-SEC-04",
+    "titre": "Procédure en cas de courriel suspect ou phishing",
+    "contenu": "Ne jamais cliquer sur les liens. Ne pas saisir ses identifiants. Transférer le mail à securite@entreprise.com et isoler immédiatement le poste."
+  },
+  {
+    "id": "KB-ACC-02",
+    "titre": "Réinitialisation de mot de passe utilisateur",
+    "contenu": "La réinitialisation d'un mot de passe nécessite une vérification d'identité par SMS ou accord du manager. Action critique nécessitant validation humaine."
+  }
+]
