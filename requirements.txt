@@ -6,3 +6,6 @@ pydantic>=2.0
 # (échec de compilation Rust). Utiliser Python <=3.13 ou installer le toolchain Rust :
 # https://rustup.rs — puis décommenter la ligne ci-dessous.
 # chromadb>=0.4
+# NOTE Dev 4 (LLM) : Gemini intégré via REST stdlib (aucune dépendance nécessaire).
+# Clé : GEMINI_API_KEY (https://aistudio.google.com/apikey, free tier). SDK optionnel :
+# google-genai

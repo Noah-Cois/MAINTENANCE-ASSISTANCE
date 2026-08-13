@@ -1,0 +1,46 @@
+{
+  "utilisateurs": [
+    {
+      "id": "U-001",
+      "nom": "Alice Rakoto",
+      "role": "Agent de maintenance",
+      "service": "Maintenance",
+      "email": "alice.rakoto@ispm.mg"
+    },
+    {
+      "id": "U-002",
+      "nom": "Bruno Ravelojaona",
+      "role": "Technicien reseau",
+      "service": "Equipe Reseau",
+      "email": "bruno.ravelojaona@ispm.mg"
+    },
+    {
+      "id": "U-003",
+      "nom": "Claire Andriamihaja",
+      "role": "Technicienne electrique",
+      "service": "Equipe Electrique",
+      "email": "claire.andriamihaja@ispm.mg"
+    },
+    {
+      "id": "U-004",
+      "nom": "David Rasolofoniaina",
+      "role": "Technicien mecanique",
+      "service": "Equipe Mecanique",
+      "email": "david.rasolofoniaina@ispm.mg"
+    },
+    {
+      "id": "U-005",
+      "nom": "Emma Rabemananjara",
+      "role": "Technicienne logiciel",
+      "service": "Equipe Logiciel",
+      "email": "emma.rabemananjara@ispm.mg"
+    },
+    {
+      "id": "U-006",
+      "nom": "Franck Razafindrakoto",
+      "role": "Technicien de garde",
+      "service": "Equipe Support General",
+      "email": "franck.razafindrakoto@ispm.mg"
+    }
+  ]
+}

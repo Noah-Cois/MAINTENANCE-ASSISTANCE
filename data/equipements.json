@@ -1,0 +1,68 @@
+{
+  "equipements": [
+    {
+      "code": "NET-04",
+      "nom": "Switch principal salle serveur",
+      "type": "Réseau",
+      "localisation": "Batiment A - Salle serveur",
+      "service": "Informatique",
+      "etat": "operationnel"
+    },
+    {
+      "code": "NET-07",
+      "nom": "Point d'acces WiFi atelier",
+      "type": "Réseau",
+      "localisation": "Batiment B - Atelier",
+      "service": "Informatique",
+      "etat": "operationnel"
+    },
+    {
+      "code": "ELEC-02",
+      "nom": "Tableau electrique ligne de production",
+      "type": "Électrique",
+      "localisation": "Batiment B - Ligne 2",
+      "service": "Production",
+      "etat": "en_alerte"
+    },
+    {
+      "code": "ELEC-05",
+      "nom": "Onduleur centrale telephonique",
+      "type": "Électrique",
+      "localisation": "Batiment A - Rez-de-chaussee",
+      "service": "Informatique",
+      "etat": "operationnel"
+    },
+    {
+      "code": "MECA-01",
+      "nom": "Compresseur principal",
+      "type": "Mécanique",
+      "localisation": "Batiment B - Local compresseur",
+      "service": "Production",
+      "etat": "operationnel"
+    },
+    {
+      "code": "MECA-05",
+      "nom": "Convoyeur d'emballage",
+      "type": "Mécanique",
+      "localisation": "Batiment B - Ligne 3",
+      "service": "Production",
+      "etat": "en_maintenance"
+    },
+    {
+      "code": "LOG-03",
+      "nom": "Poste de supervision SCADA",
+      "type": "Logiciel",
+      "localisation": "Salle de controle",
+      "service": "Production",
+      "etat": "operationnel"
+    },
+    {
+      "code": "LOG-06",
+      "nom": "Serveur de supervision",
+      "type": "Logiciel",
+      "localisation": "Batiment A - Salle serveur",
+      "service": "Informatique",
+      "etat": "operationnel"
+    }
+  ]
+}

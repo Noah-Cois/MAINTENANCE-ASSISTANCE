@@ -16,10 +16,11 @@ from __future__ import annotations
 
 import time
 import uuid
+from pathlib import Path
 
 import streamlit as st
 
-from src import observability
+from src import llm, observability
 
 try:
     from src.agent import Agent  # agent LangGraph réel (Dev 3)
@@ -28,6 +29,16 @@ except ImportError:
 
 
 st.set_page_config(page_title="Maintenance Assistance", page_icon="🔧", layout="wide")
+
+try:
+    _theme = st.get_option("theme.base")
+    _logo_path = Path(__file__).resolve().parent / (
+        "logo_ispm_dark.png" if _theme == "dark" else "logo_ispm.png"
+    )
+    if _logo_path.is_file():
+        st.logo(_logo_path, size="large")
+except Exception:
+    pass  # logo facultatif : ne jamais bloquer l'app
 
 _BACKEND = observability.setup_observability()
 
@@ -56,6 +67,10 @@ with st.sidebar:
     col1.metric("Tickets créés", metrics["tickets_crees"])
     col2.metric("Escalades", metrics["escalades"])
     st.caption("Logs bruts : `logs/runs.jsonl` (repli local si pas de clé LangSmith)")
+    if llm.disponible():
+        st.caption(f"🤖 LLM : **Gemini actif** (`{llm.modele()}`)")
+    else:
+        st.caption("⚙️ LLM : non configuré (clé `GEMINI_API_KEY` manquante) — repli règles + RAG")
     if st.button("🔄 Nouvelle conversation", use_container_width=True):
         _new_session()
         st.rerun()
@@ -72,11 +87,16 @@ def _show_classification(c: dict) -> None:
         c4.metric("Confiance", f"{c.get('confiance', 0):.0%}")
 
 
-def _show_reponse(r: dict) -> None:
+def _show_reponse(r: dict, llm_utilise: bool | None = None) -> None:
     st.markdown(r["texte"])
+    if llm_utilise is not None:
+        if llm_utilise:
+            st.caption("🤖 Rédigé par **Gemini** (LLM)")
+        else:
+            st.caption("⚙️ Rédigé par les **règles + RAG** (LLM indisponible)")
     if r.get("sources"):
         with st.expander("📚 Sources citées"):
-            st.markdown("Les réponses RAG citent leurs sources :")
+            st.markdown("Les sources proviennent du RAG (indépendantes du LLM) :")
             for s in r["sources"]:
                 st.markdown(f"- `{s}`")
 
@@ -98,7 +118,7 @@ def _render_message(msg: dict) -> None:
         elif kind == "questions":
             _show_questions(msg["content"])
         elif kind == "reponse":
-            _show_reponse(msg["content"])
+            _show_reponse(msg["content"], msg.get("llm"))
 
 
 # --------------------------------------------------------------------------- historique
@@ -131,13 +151,27 @@ if st.session_state.pending and st.session_state.state:
                 latence_ms,
             )
             st.session_state.state = new_state
-            st.session_state.messages.append({"role": "assistant", "kind": "reponse", "content": new_state["reponse"]})
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "kind": "reponse",
+                    "content": new_state["reponse"],
+                    "llm": llm.derniere_appel().get("utilise", False),
+                }
+            )
             st.session_state.pending = False
             st.rerun()
         if c2.button("✖ Refuser", key="btn_refuser", use_container_width=True):
             new_state = agent.resume(st.session_state.session_id, approbation=False)
             st.session_state.state = new_state
-            st.session_state.messages.append({"role": "assistant", "kind": "reponse", "content": new_state["reponse"]})
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "kind": "reponse",
+                    "content": new_state["reponse"],
+                    "llm": llm.derniere_appel().get("utilise", False),
+                }
+            )
             st.session_state.pending = False
             st.rerun()
 
@@ -161,7 +195,14 @@ if prompt:
     if state.get("questions"):
         st.session_state.messages.append({"role": "assistant", "kind": "questions", "content": state["questions"]})
     if state.get("reponse"):
-        st.session_state.messages.append({"role": "assistant", "kind": "reponse", "content": state["reponse"]})
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "kind": "reponse",
+                "content": state["reponse"],
+                "llm": llm.derniere_appel().get("utilise", False),
+            }
+        )
         observability.log_run(
             st.session_state.session_id,
             "rag",
