@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from typing import List
 from pydantic import BaseModel, Field
+import streamlit as st
 from google import genai
 from google.genai import types
 
@@ -18,8 +19,22 @@ class TicketAnalysis(BaseModel):
     validation_humaine_requise: bool = Field(description="True pour actions sensibles ou si est_malveillant est True")
 
 def analyze_ticket(ticket_description: str) -> TicketAnalysis:
-    # Initialisation du client Google GenAI avec la clé du fichier .env
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+    # Récupération sécurisée de la clé API (Streamlit Secrets prioritaire, puis .env local)
+    api_key = None
+    try:
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            api_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+        
+    if not api_key:
+        api_key = os.environ.get("GEMINI_API_KEY")
+
+    if not api_key:
+        raise ValueError("Erreur : La clé GEMINI_API_KEY est introuvable dans les secrets Streamlit ou l'environnement.")
+
+    # Initialisation du client Google GenAI avec la clé récupérée
+    client = genai.Client(api_key=api_key)
 
     system_prompt = """
     Tu es l'assistant 'mAlntenance & Assistance'. 
@@ -30,7 +45,7 @@ def analyze_ticket(ticket_description: str) -> TicketAnalysis:
     4. Si le ticket est sensible ou malveillant, force 'est_malveillant' à True et 'validation_humaine_requise' à True.
     """
 
-    # Appel à Gemini avec le modèle valide gemini-2.5-flash et la contrainte de schéma Pydantic
+    # Appel à Gemini avec le modèle et la contrainte de schéma Pydantic
     response = client.models.generate_content(
         model='gemini-3.5-flash',
         contents=f"Ticket à analyser : {ticket_description}",
