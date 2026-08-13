@@ -1,13 +1,14 @@
 import json
 from pathlib import Path
 from src.classifier import analyze_ticket, TicketAnalysis
+from src.rag import RagedService
 
-def load_kb() -> list:
-    kb_path = Path("data/connaissances_kb.json")
-    if kb_path.exists():
-        with open(kb_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+# Initialisation globale du service RAG (évite de recharger ChromaDB à chaque requête)
+try:
+    rag_service = RagedService(forcer_maj=False)
+except Exception as e:
+    print(f"⚠️ Avertissement RAG : {e}")
+    rag_service = None
 
 def traiter_ticket(description: str):
     print(f"--- Analyse du ticket ---")
@@ -27,12 +28,19 @@ def traiter_ticket(description: str):
             print(f" - {q}")
         return
 
-    # Si tout est OK, recherche dans la KB
-    kb = load_kb()
-    print(f"\n🔍 Recherche dans la base de connaissances ({len(kb)} articles)...")
-    # Logique de matching simple ou RAG à connecter ici
-    print("✓ Traitement standard prêt pour la suite.")
+    # Si tout est OK, recherche sémantique via le RAG du Développeur 1
+    if rag_service:
+        print(f"\n🔍 Recherche sémantique dans la Base de Connaissances...")
+        resultats = rag_service.chercher_aide(description, top_k=2)
+        
+        print("\n--- Procédures et Sources trouvées ---")
+        for res in resultats:
+            print(f"• ID Source : {res['source_id']} ({res['titre']})")
+            print(f"  Fiable : {'Oui' if res['est_fiable'] else 'Non'} (Score: {res['score_distance']})")
+            print(f"  Contenu : {res['contenu']}\n")
+    else:
+        print("❌ Service RAG non disponible.")
 
 if __name__ == "__main__":
     # Test rapide
-    traiter_ticket("Mon écran clignote et je n'ai plus internet depuis la salle 204.")
+    traiter_ticket("Comment configurer le réseau Wi-Fi sécurisé de l'entreprise sur un nouveau poste ?.")

@@ -12,5 +12,68 @@
     "categorie": "Système",
     "description": "Alerte de monitoring indiquant un espace disque disponible inférieur à 5%.",
     "solutions": "1. Exécuter le script de nettoyage des logs temporaires. 2. Identifier les fichiers volumineux obsolètes. 3. Si nécessaire, demander une extension de volume de stockage."
+  },
+  {
+    "id": "KB-NET-04",
+    "titre": "Panne réseau : perte de connectivité",
+    "categorie": "Réseau",
+    "description": "Gestion des incidents liés à une perte de connectivité, absence de ping, réseau lent ou aucun accès internet.",
+    "solutions": "1. Vérifier les connecteurs RJ45 et l'état des câbles. 2. Redémarrer le switch du secteur concerné. 3. Tester la connectivité avec un ping vers la passerelle. 4. Si le problème persiste, vérifier la configuration DNS et l'état du pare-feu."
+  },
+  {
+    "id": "KB-NET-07",
+    "titre": "Perte de paquets intermittente",
+    "categorie": "Réseau",
+    "description": "Intervention en cas de connexion instable, déconnexions fréquentes ou perte de paquets sur une interface réseau.",
+    "solutions": "1. Vérifier le taux d'erreurs sur les interfaces du switch. 2. Remplacer le câble si le taux d'erreur dépasse 1%. 3. Vérifier l'absence de boucle (STP) dans le VLAN concerné."
+  },
+  {
+    "id": "KB-ELEC-02",
+    "titre": "Équipement sans alimentation",
+    "categorie": "Électrique",
+    "description": "Procédure d'urgence pour les cas d'absence de courant, équipement totalement inerte, absence de voyant ou surchauffe.",
+    "solutions": "1. Couper l'alimentation principale avant toute intervention. 2. Contrôler le disjoncteur et le fusible de l'équipement. 3. Vérifier les connecteurs d'arrivée courant. 4. Ne pas démarrer l'équipement sans avoir vérifié la tension en sortie."
+  },
+  {
+    "id": "KB-ELEC-05",
+    "titre": "Variation de tension secteur",
+    "categorie": "Électrique",
+    "description": "Diagnostic en cas de variations de tension, redémarrages intempestifs d'équipements ou déclenchement d'alarmes de tension.",
+    "solutions": "1. Mesurer la tension secteur avec un voltmètre pendant 15 minutes. 2. Vérifier l'onduleur et les batteries. 3. Brancher un enregistreur de tension si le problème est intermittent."
+  },
+  {
+    "id": "KB-MECA-01",
+    "titre": "Bruit anormal sur machine tournante",
+    "categorie": "Mécanique",
+    "description": "Traitement des alertes de bruits anormaux, vibrations, grippage ou échauffement sur les pièces tournantes.",
+    "solutions": "1. Vérifier les fixations et le serrage des boulons. 2. Contrôler le niveau de lubrification. 3. Inspecter les pièces d'usure (courroies, roulements). 4. Un bruit continu peut indiquer un roulement en fin de vie (voir KB-MECA-05)."
+  },
+  {
+    "id": "KB-MECA-05",
+    "titre": "Remplacement d'un roulement",
+    "categorie": "Mécanique",
+    "description": "Procédure technique pour le remplacement d'un roulement usé, bruyant ou présentant du jeu dans l'arbre.",
+    "solutions": "1. Immobiliser la machine et la condamner en sécurité. 2. Démonter le carter de protection. 3. Extraire le roulement avec un extracteur adapté. 4. Graisser le nouveau roulement et le monter à l'aide d'un tube de chasse."
+  },
+  {
+    "id": "KB-LOG-03",
+    "titre": "Application de supervision bloquée",
+    "categorie": "Logiciel",
+    "description": "Résolution des cas d'écran figé, d'application qui ne répond plus ou d'erreurs mémoire sur les postes de supervision.",
+    "solutions": "1. Redémarrer le service applicatif. 2. Vérifier les journaux d'erreurs dans le gestionnaire d'événements. 3. Libérer la mémoire des processus zombies. 4. Appliquer la procédure de réinitialisation KB-LOG-06 si le problème persiste."
+  },
+  {
+    "id": "KB-LOG-06",
+    "titre": "Réinitialisation d'un poste de supervision",
+    "categorie": "Logiciel",
+    "description": "Procédure de restauration en cas de mot de passe oublié, de configuration corrompue ou d'écran bleu.",
+    "solutions": "1. Sauvegarder le dossier de configuration. 2. Réinitialiser le poste en mode sans échec. 3. Restaurer la configuration depuis la sauvegarde. 4. Vérifier la remontée des alertes après redémarrage."
+  },
+  {
+    "id": "KB-GEN-01",
+    "titre": "Procédure générale : panne non identifiée",
+    "categorie": "Autre",
+    "description": "Méthodologie standard à suivre en cas de panne inconnue ou d'absence de code erreur spécifique.",
+    "solutions": "1. Rassembler les informations (équipement, symptômes, code erreur). 2. Vérifier les incidents actifs sur l'équipement. 3. Consulter l'historique de maintenance. 4. Escalader vers le technicien de garde si aucune procédure ne correspond."
   }
 ]
