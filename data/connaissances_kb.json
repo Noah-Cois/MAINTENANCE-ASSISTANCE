@@ -1,0 +1,143 @@
+{
+  "fiches": [
+    {
+      "id": "KB-NET-04",
+      "titre": "Panne réseau : perte de connectivité",
+      "categorie": "Réseau",
+      "equipement": "NET-04",
+      "symptomes": ["perte de connectivite", "pas de ping", "reseau lent", "aucun acces internet"],
+      "procedure": [
+        "Verifier les connecteurs RJ45 et l'etat des câbles",
+        "Redemarrer le switch du secteur concerne",
+        "Tester la connectivite avec un ping vers la passerelle",
+        "Si le probleme persiste, verifier la configuration DNS et l'etat du pare-feu"
+      ],
+      "duree_estimee_min": 30
+    },
+    {
+      "id": "KB-NET-07",
+      "titre": "Perte de paquets intermittente",
+      "categorie": "Réseau",
+      "equipement": "NET-07",
+      "symptomes": ["perte de paquets", "connexion instable", "deconnexions frequentes"],
+      "procedure": [
+        "Verifier le taux d'erreurs sur les interfaces du switch",
+        "Remplacer le câble si le taux d'erreur depasse 1%",
+        "Verifier l'absence de boucle (STP) dans le VLAN concerne"
+      ],
+      "duree_estimee_min": 45
+    },
+    {
+      "id": "KB-ELEC-02",
+      "titre": "Equipement sans alimentation",
+      "categorie": "Électrique",
+      "equipement": "ELEC-02",
+      "symptomes": ["pas de courant", "equipement mort", "aucun voyant", "surchauffe"],
+      "procedure": [
+        "Couper l'alimentation principale avant toute intervention",
+        "Controler le disjoncteur et le fusible de l'equipement",
+        "Verifier les connecteurs d'arrivee courant",
+        "Ne pas demarrer l'equipement sans avoir verifie la tension en sortie"
+      ],
+      "duree_estimee_min": 20
+    },
+    {
+      "id": "KB-ELEC-05",
+      "titre": "Variation de tension secteur",
+      "categorie": "Électrique",
+      "equipement": "ELEC-05",
+      "symptomes": ["variations de tension", "equipement qui redemarre seul", "alarme tension"],
+      "procedure": [
+        "Mesurer la tension secteur avec un voltmetre pendant 15 minutes",
+        "Verifier l'onduleur et les batteries",
+        "Brancher un enregistreur de tension si le probleme est intermittent"
+      ],
+      "duree_estimee_min": 60
+    },
+    {
+      "id": "KB-MECA-01",
+      "titre": "Bruit anormal sur machine tournante",
+      "categorie": "Mécanique",
+      "equipement": "MECA-01",
+      "symptomes": ["bruit anormal", "vibrations", "grippage", "chauffage"],
+      "procedure": [
+        "Verifier les fixations et le serrage des boulons",
+        "Controler le niveau de lubrification",
+        "Inspecter les pieces d'usure (courroies, roulements)",
+        "Un bruit continu peut indiquer un roulement en fin de vie (voir KB-MECA-05)"
+      ],
+      "duree_estimee_min": 40
+    },
+    {
+      "id": "KB-MECA-05",
+      "titre": "Remplacement d'un roulement",
+      "categorie": "Mécanique",
+      "equipement": "MECA-05",
+      "symptomes": ["roulement use", "bruit de grattement", "jeu dans l'arbre"],
+      "procedure": [
+        "Immobiliser la machine et la condamner en securite",
+        "Demonter le carter de protection",
+        "Extraire le roulement avec un extracteur adapte",
+        "Graisser le nouveau roulement et le monter a l'aide d'un tube de chasse"
+      ],
+      "duree_estimee_min": 90
+    },
+    {
+      "id": "KB-MECA-02",
+      "titre": "Surchauffe pompe hydraulique",
+      "categorie": "Mécanique",
+      "equipement": "P-101",
+      "symptomes": ["surchauffe", "arret intempestif", "grippage", "bruit anormal"],
+      "procedure": [
+        "Couper la pompe et condamner le demarrage avant toute intervention",
+        "Verifier le niveau et l'etat du fluide hydraulique",
+        "Controler la filtration et l'encrassement des carters",
+        "Verifier l'alignement du moteur et l'etat des roulements",
+        "Si la surchauffe persiste, basculer sur la pompe de secours et escalader au technicien"
+      ],
+      "duree_estimee_min": 35
+    },
+    {
+      "id": "KB-LOG-03",
+      "titre": "Application de supervision bloquee",
+      "categorie": "Logiciel",
+      "equipement": "LOG-03",
+      "symptomes": ["ecran fige", "application ne repond plus", "erreur memoire"],
+      "procedure": [
+        "Redemarrer le service applicatif",
+        "Verifier les journaux d'erreurs dans le gestionnaire d'evenements",
+        "Liberer la memoire des processus zombies",
+        "Appliquer la procedure de reinitialisation KB-LOG-06 si le probleme persiste"
+      ],
+      "duree_estimee_min": 25
+    },
+    {
+      "id": "KB-LOG-06",
+      "titre": "Reinitialisation d'un poste de supervision",
+      "categorie": "Logiciel",
+      "equipement": "LOG-06",
+      "symptomes": ["mot de passe oublie", "configuration corrompue", "ecran bleu"],
+      "procedure": [
+        "Sauvegarder le dossier de configuration",
+        "Reinitialiser le poste en mode sans echec",
+        "Restaurer la configuration depuis la sauvegarde",
+        "Verifier la remontee des alertes apres redemarrage"
+      ],
+      "duree_estimee_min": 35
+    },
+    {
+      "id": "KB-GEN-01",
+      "titre": "Procedure generale : panne non identifiee",
+      "categorie": "Autre",
+      "equipement": null,
+      "symptomes": ["panne inconnue", "aucun code erreur"],
+      "procedure": [
+        "Rassembler les informations (equipement, symptomes, code erreur)",
+        "Verifier les incidents actifs sur l'equipement",
+        "Consulter l'historique de maintenance",
+        "Escalader vers le technicien de garde si aucune procedure ne correspond"
+      ],
+      "duree_estimee_min": 15
+    }
+  ]
+}

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import time
 import uuid
+from pathlib import Path
 
 import streamlit as st
 
@@ -28,6 +29,16 @@ except ImportError:
 
 
 st.set_page_config(page_title="Maintenance Assistance", page_icon="🔧", layout="wide")
+
+try:
+    _theme = st.get_option("theme.base")
+    _logo_path = Path(__file__).resolve().parent / (
+        "logo_ispm_dark.png" if _theme == "dark" else "logo_ispm.png"
+    )
+    if _logo_path.is_file():
+        st.logo(_logo_path, size="large")
+except Exception:
+    pass  # logo facultatif : ne jamais bloquer l'app
 
 _BACKEND = observability.setup_observability()
 

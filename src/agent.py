@@ -1,211 +1,191 @@
-"""
-Squelette de l'agent (LangGraph) + système d'interruption pour validation humaine
------------------------------------------------------------------------------------
-Développeur 3 - Expert Agent & Outils Python
+"""Agent de maintenance — orchestrateur des modules.
 
-Ce fichier construit la machine à états (graphe) qui orchestre le cycle de
-vie d'un ticket. Les nœuds "classification" et "rag" sont des placeholders
-en attendant les modules classifier.py et rag.py des autres développeurs :
-il suffit de remplacer leur corps par un appel aux vraies fonctions, la
-forme de l'état (TicketState) ne change pas.
+Implémente le contrat d'interface utilisé par app.py (Dev 4) :
 
-Le cœur de MA responsabilité :
-  - guardrails (déclenchement de la pause pour les outils sensibles)
-  - validation_humaine (interrupt() + reprise via Command(resume=...))
-  - execution_outil (appel réel des outils définis dans tools.py)
-"""
+    state = agent.run(question: str, session_id: str) -> dict
+    state = agent.resume(session_id: str, approbation: bool) -> dict
 
-from typing import TypedDict, Annotated, Optional
-
-from langgraph.graph import StateGraph, START, END
-from langgraph.graph.message import add_messages
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.types import interrupt, Command
-
-from src.tools import TOOLS, SENSITIVE_TOOLS
-
-
-class TicketState(TypedDict, total=False):
-    messages: Annotated[list, add_messages]
-    ticket_brut: str
-    categorie: Optional[str]
-    priorite: Optional[str]
-    equipe: Optional[str]
-    confiance: Optional[float]
-    sources: list
-    action_proposee: Optional[dict]     # {"tool": str, "args": dict, "justification": str}
-    validation_requise: bool
-    validation_decision: Optional[str]  # "approuve" | "refuse"
-    resultat_outil: Optional[dict]
-    resultat_final: Optional[dict]
-
-
-# ---------------------------------------------------------------------------
-# Nœuds placeholders (à remplacer par les modules des autres devs)
-# ---------------------------------------------------------------------------
-
-def node_classification(state: TicketState) -> dict:
-    """Placeholder - sera remplacé par src/classifier.py."""
-    return {
-        "categorie": state.get("categorie", "non_classifie"),
-        "priorite": state.get("priorite", "moyenne"),
-        "equipe": state.get("equipe", "support_niveau_1"),
-        "confiance": state.get("confiance", 0.5),
+Format du state (dict) :
+    {
+        "etape": "classification" | "diagnostic" | "validation" | "termine",
+        "classification": {"categorie", "priorite", "equipe", "confiance"} | None,
+        "questions": [str, ...],
+        "reponse": {"texte": str, "sources": [str, ...]} | None,
+        "pending_validation": {"action", "description", "equipement"} | None,
+        "ticket_created": bool,
     }
 
+Pipeline (par tour) :
+    guardrails -> classifier -> diagnosis -> rag (recherche) -> tools (ticket)
+La validation humaine interrompt le flux : `resume()` reprend après décision.
+"""
 
-def node_rag(state: TicketState) -> dict:
-    """Placeholder - sera remplacé par src/rag.py."""
-    return {"sources": state.get("sources", [])}
+from __future__ import annotations
 
+from src import llm, observability
+from src.classifier import classifier
+from src.diagnosis import est_complete, extraire_informations, generer_questions
+from src.guardrails import verifier_demande
+from src.rag import citer_sources, rechercher
+from src.tools import creer_ticket, escalader_vers_technicien
 
-# ---------------------------------------------------------------------------
-# Nœuds sous ma responsabilité
-# ---------------------------------------------------------------------------
-
-def node_guardrails(state: TicketState) -> dict:
-    """Détecte si l'action proposée fait partie des outils sensibles.
-    La détection avancée (prompt injection, cas limites métier) revient au
-    module guardrails.py dédié ; ici on ne gère que le déclenchement de la
-    pause pour les outils marqués SENSITIVE_TOOLS.
-    """
-    action = state.get("action_proposee")
-    requiert_validation = bool(action) and action.get("tool") in SENSITIVE_TOOLS
-    return {"validation_requise": requiert_validation}
+_ETAPES = ("classification", "diagnostic", "validation", "termine")
 
 
-def node_validation_humaine(state: TicketState) -> dict:
-    """Met le graphe en pause et attend la décision d'un humain (bouton UI
-    Approuver / Refuser dans Streamlit/Chainlit). Reprend l'exécution via :
+def _reponse_rag(question: str, classification: dict | None = None) -> dict:
+    """Construit la réponse : rédaction LLM (Gemini) si disponible,
+    sinon procédures RAG + sources citées."""
+    resultats = rechercher(question, top_k=3)
+    sources = citer_sources(resultats)
 
-        app.invoke(Command(resume={"decision": "approuve"}), config=config)
-    """
-    action = state["action_proposee"]
-    decision = interrupt(
-        {
-            "type": "validation_requise",
-            "message": "Une action sensible nécessite une validation humaine avant exécution.",
-            "action_proposee": action,
-        }
-    )
-    return {"validation_decision": decision.get("decision", "refuse")}
-
-
-TOOLS_BY_NAME = {t.name: t for t in TOOLS}
-
-
-def node_execution_outil(state: TicketState) -> dict:
-    """Exécute réellement l'outil demandé (après validation si nécessaire)."""
-    action = state["action_proposee"]
-    tool_fn = TOOLS_BY_NAME.get(action["tool"])
-    if tool_fn is None:
-        return {"resultat_outil": {"erreur": f"Outil inconnu : {action['tool']}"}}
-    resultat = tool_fn.invoke(action.get("args", {}))
-    return {"resultat_outil": resultat}
-
-
-def node_sortie(state: TicketState) -> dict:
-    """Construit la sortie JSON structurée finale du traitement du ticket."""
-    if state.get("validation_requise") and state.get("validation_decision") != "approuve":
+    if not resultats:
         return {
-            "resultat_final": {
-                "statut": "action_refusee",
-                "categorie": state.get("categorie"),
-                "priorite": state.get("priorite"),
-                "equipe": state.get("equipe"),
-                "message": "L'action sensible proposée a été refusée par le validateur humain.",
+            "texte": "Aucune procédure trouvée dans la base de connaissances. "
+                     "La procédure générale KB-GEN-01 s'applique : escalade vers le technicien de garde.",
+            "sources": ["KB-GEN-01"],
+        }
+
+    texte = llm.rediger_reponse(question, classification, resultats)
+    if not texte:
+        lignes = ["Voici les procédures recommandées :"]
+        for r in resultats:
+            lignes.append(f"- [{r['source']}] {r['contenu']}")
+        texte = "\n".join(lignes)
+    return {"texte": texte, "sources": sources}
+
+
+class Agent:
+    """Agent de maintenance : pipeline complet avec validation humaine."""
+
+    def __init__(self) -> None:
+        self._sessions: dict[str, dict] = {}
+
+    def _session(self, session_id: str) -> dict:
+        return self._sessions.setdefault(
+            session_id,
+            {"etape": "classification", "contexte": {"equipement": None, "symptomes": [], "code_erreur": None}},
+        )
+
+    # ------------------------------------------------------------------ run
+    def run(self, question: str, session_id: str) -> dict:
+        session = self._session(session_id)
+        question = (question or "").strip()
+        ctx = session["contexte"]
+
+        # --- 1. garde-fous (Module 6) ---
+        garde = verifier_demande(question)
+        if not garde["valide"]:
+            session["etape"] = "termine"
+            observability.log_run(session_id, "guardrails", question, garde["raison"], None, extra={"garde_fou": garde["type"]})
+            return {
+                "etape": "termine",
+                "classification": None,
+                "questions": [],
+                "reponse": {"texte": f"🚫 Demande bloquée : {garde['raison']}", "sources": []},
+                "pending_validation": None,
+                "ticket_created": False,
             }
+
+        # --- 2. extraction d'infos (Module 2) + accumulation du contexte ---
+        infos = extraire_informations(question, session)
+        ctx.update(
+            {
+                "equipement": infos["equipement"] or ctx.get("equipement"),
+                "symptomes": infos["symptomes"] or ctx.get("symptomes") or [],
+                "code_erreur": infos["code_erreur"] or ctx.get("code_erreur"),
+            }
+        )
+
+        # --- 3. classification (Module 1) ---
+        classification = classifier(question, ctx)
+
+        # --- 4. demande incomplète -> questions ciblées (Module 2) ---
+        if not est_complete(infos):
+            session["etape"] = "diagnostic"
+            observability.log_run(
+                session_id, "diagnostic", question, None, None,
+                extra={"classification": classification, "questions": infos},
+            )
+            return {
+                "etape": "diagnostic",
+                "classification": classification,
+                "questions": generer_questions(infos),
+                "reponse": None,
+                "pending_validation": None,
+                "ticket_created": False,
+            }
+
+        # --- 5. réponse RAG avec sources citées (Module 3) ---
+        ctx["description"] = question
+        reponse = _reponse_rag(question, classification)
+
+        # --- 6. action proposée -> validation humaine (Module 4 + interruption) ---
+        session["etape"] = "validation"
+        observability.log_run(
+            session_id, "validation", question, reponse["texte"], reponse["sources"],
+            extra={"classification": classification, "llm": llm.derniere_appel()},
+        )
+        return {
+            "etape": "validation",
+            "classification": classification,
+            "questions": [],
+            "reponse": reponse,
+            "pending_validation": {
+                "action": "creer_ticket",
+                "description": (
+                    f"Créer un ticket de maintenance pour {ctx['equipement']} "
+                    f"(catégorie {classification['categorie']}, priorité {classification['priorite']}, "
+                    f"{classification['equipe']}) : {question}"
+                ),
+                "equipement": ctx["equipement"],
+            },
+            "ticket_created": False,
         }
-    return {
-        "resultat_final": {
-            "statut": "traite",
-            "categorie": state.get("categorie"),
-            "priorite": state.get("priorite"),
-            "equipe": state.get("equipe"),
-            "confiance": state.get("confiance"),
-            "sources": state.get("sources", []),
-            "resultat_outil": state.get("resultat_outil"),
+
+    # ------------------------------------------------------------------ resume
+    def resume(self, session_id: str, approbation: bool) -> dict:
+        session = self._session(session_id)
+        ctx = session["contexte"]
+        session["etape"] = "termine"
+
+        if not approbation:
+            return {
+                "etape": "termine",
+                "classification": None,
+                "questions": [],
+                "reponse": {"texte": "Action refusée : aucun ticket n'a été créé.", "sources": []},
+                "pending_validation": None,
+                "ticket_created": False,
+            }
+
+        classification = classifier(ctx.get("description") or "")
+        reponse = _reponse_rag(ctx.get("description") or "", classification)
+
+        ticket = creer_ticket(
+            description=ctx.get("description", ""),
+            equipement=ctx.get("equipement", ""),
+            categorie=classification["categorie"],
+            priorite=classification["priorite"],
+        )
+
+        if classification["categorie"] == "Autre":
+            # panne non identifiée -> escalade vers le technicien de garde
+            ticket_id = ticket.get("ticket", {}).get("id", "TK-????")
+            escalader_vers_technicien(ticket_id=ticket_id, technicien="Franck Razafindrakoto")
+
+        ticket_id = ticket.get("ticket", {}).get("id", "TK-????")
+        observability.log_run(
+            session_id, "ticket", ctx.get("description", ""), reponse["texte"], reponse["sources"],
+            extra={"ticket_id": ticket_id, "approbation": True},
+        )
+        return {
+            "etape": "termine",
+            "classification": None,
+            "questions": [],
+            "reponse": {
+                "texte": f"✅ Ticket {ticket_id} créé.\n\n{reponse['texte']}",
+                "sources": reponse["sources"],
+            },
+            "pending_validation": None,
+            "ticket_created": True,
         }
-    }
-
-
-# ---------------------------------------------------------------------------
-# Routage conditionnel
-# ---------------------------------------------------------------------------
-
-def route_apres_guardrails(state: TicketState) -> str:
-    return "validation_humaine" if state.get("validation_requise") else "execution_outil"
-
-
-def route_apres_validation(state: TicketState) -> str:
-    return "execution_outil" if state.get("validation_decision") == "approuve" else "sortie"
-
-
-# ---------------------------------------------------------------------------
-# Construction du graphe
-# ---------------------------------------------------------------------------
-
-def build_graph():
-    graph = StateGraph(TicketState)
-
-    graph.add_node("classification", node_classification)
-    graph.add_node("rag", node_rag)
-    graph.add_node("guardrails", node_guardrails)
-    graph.add_node("validation_humaine", node_validation_humaine)
-    graph.add_node("execution_outil", node_execution_outil)
-    graph.add_node("sortie", node_sortie)
-
-    graph.add_edge(START, "classification")
-    graph.add_edge("classification", "rag")
-    graph.add_edge("rag", "guardrails")
-
-    graph.add_conditional_edges(
-        "guardrails",
-        route_apres_guardrails,
-        {"validation_humaine": "validation_humaine", "execution_outil": "execution_outil"},
-    )
-    graph.add_conditional_edges(
-        "validation_humaine",
-        route_apres_validation,
-        {"execution_outil": "execution_outil", "sortie": "sortie"},
-    )
-    graph.add_edge("execution_outil", "sortie")
-    graph.add_edge("sortie", END)
-
-    # Le checkpointer est OBLIGATOIRE pour que interrupt()/Command(resume=...)
-    # fonctionnent : il permet au graphe de se "souvenir" où il s'est arrêté.
-    checkpointer = MemorySaver()
-    return graph.compile(checkpointer=checkpointer)
-
-
-# ---------------------------------------------------------------------------
-# Démo autonome : scénario "serveur saturé" -> action sensible -> pause -> reprise
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    app = build_graph()
-    config = {"configurable": {"thread_id": "demo-scenario-2"}}
-
-    ticket_initial = {
-        "ticket_brut": "Le serveur web de production ne répond plus depuis 10 minutes.",
-        "categorie": "infrastructure",
-        "priorite": "critique",
-        "equipe": "infrastructure",
-        "action_proposee": {
-            "tool": "redemarrer_service",
-            "args": {"equipement_id": "SRV-WEB-01"},
-            "justification": "Le diagnostic montre un serveur injoignable, un redémarrage est proposé.",
-        },
-    }
-
-    resultat = app.invoke(ticket_initial, config=config)
-
-    if "__interrupt__" in resultat:
-        print("Le graphe est en pause, en attente d'une validation humaine :")
-        print(resultat["__interrupt__"])
-        # Dans l'UI Streamlit/Chainlit, ceci correspond au clic sur "Approuver".
-        decision_humaine = {"decision": "approuve"}
-        resultat = app.invoke(Command(resume=decision_humaine), config=config)
-
-    print("Résultat final :")
-    print(resultat["resultat_final"])

@@ -1,5 +1,13 @@
-.venv/
+# Base de données vectorielle locale (générée automatiquement sur chaque PC)
+chroma_db/
+
+# Fichier contenant les clés API secrètes
+.env
+
+# Fichiers de cache Python
 __pycache__/
 *.pyc
+.pytest_cache/
+
+.venv/
 logs/
-.env

@@ -4,5 +4,10 @@ langsmith>=0.1
 pydantic>=2.0
 # NOTE Dev 1 (RAG) : chromadb nécessite des wheels compilées absentes sur Python 3.14
 # (échec de compilation Rust). Utiliser Python <=3.13 ou installer le toolchain Rust :
-# https://rustup.rs — puis décommenter la ligne ci-dessous.
+# https://rustup.rs — puis décommenter les lignes ci-dessous.
 # chromadb>=0.4
+# langchain-chroma
+# langchain-huggingface
+# NOTE Dev 4 (LLM) : Gemini intégré via REST stdlib (aucune dépendance nécessaire).
+# Clé : GEMINI_API_KEY (https://aistudio.google.com/apikey, free tier). SDK optionnel :
+# google-genai

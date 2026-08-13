@@ -35,9 +35,10 @@ puis proposer des actions (création de ticket, escalade) **soumises à validati
 
 | Fichier | Rôle | Dev |
 |---|---|---|
-| `classifier.py` | Compréhension, catégorie, priorité, équipe (sorties JSON strictes Pydantic) | 2 |
+| `classifier.py` | Compréhension, catégorie, priorité, équipe (sorties JSON strictes Pydantic) + `analyze_ticket`/`TicketAnalysis` (LLM Gemini) | 2 |
 | `diagnosis.py` | Extraction d'infos & questions ciblées | 2 |
-| `rag.py` | Recherche documentaire (ChromaDB/FAISS) & citation des sources | 1 |
+| `rag.py` | RAG Fusion (ChromaDB + embeddings HuggingFace) **ou** repli BM25 + citation des sources | 1 |
+| `prompts.py` | Prompts système (classification, scénario incomplet, sécurité) | 2 |
 | `tools.py` | Mocks des 8 outils imposés + interruption LangGraph | 3 |
 | `guardrails.py` | Anti-insultes / injection / demandes incomplètes | 2 |
 | `observability.py` | Traces, latence, métriques (LangSmith ou JSONL local) | **4** |
