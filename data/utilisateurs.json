@@ -1,0 +1,16 @@
+[
+  {
+    "id": "USR-001",
+    "nom": "Alice Martin",
+    "email": "alice.martin@entreprise.com",
+    "service": "Ressources Humaines",
+    "role": "Utilisateur"
+  },
+  {
+    "id": "USR-002",
+    "nom": "Jean Dupont",
+    "email": "jean.dupont@entreprise.com",
+    "service": "Informatique",
+    "role": "Administrateur"
+  }
+]

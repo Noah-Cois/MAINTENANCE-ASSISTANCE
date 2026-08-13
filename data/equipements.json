@@ -1,0 +1,18 @@
+[
+  {
+    "id": "EQ-NET-01",
+    "nom": "Borne Wi-Fi Étage 1",
+    "type": "Réseau",
+    "statut": "En ligne",
+    "ip": "192.168.10.5",
+    "emplacement": "Bâtiment A"
+  },
+  {
+    "id": "EQ-SYS-02",
+    "nom": "Serveur de Fichiers (NAS)",
+    "type": "Stockage",
+    "statut": "Alerte - Espace critique",
+    "ip": "192.168.20.12",
+    "emplacement": "Salle Serveur 1"
+  }
+]
