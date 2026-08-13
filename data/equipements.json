@@ -49,6 +49,14 @@
       "etat": "en_maintenance"
     },
     {
+      "code": "P-101",
+      "nom": "Pompe hydraulique principale",
+      "type": "Mécanique",
+      "localisation": "Batiment B - Local pompes",
+      "service": "Production",
+      "etat": "operationnel"
+    },
+    {
       "code": "LOG-03",
       "nom": "Poste de supervision SCADA",
       "type": "Logiciel",

@@ -40,11 +40,35 @@ def _normaliser(texte: str) -> str:
 
 def _charger_codes_equipements() -> set:
     """Codes d'équipements connus depuis data/equipements.json."""
+    return {e["code"].upper() for e in _charger_equipements()}
+
+
+def _charger_equipements() -> list:
+    """Liste des équipements de l'inventaire (data/equipements.json)."""
     try:
         data = json.loads((_DATA_DIR / "equipements.json").read_text(encoding="utf-8"))
-        return {e["code"].upper() for e in data.get("equipements", [])}
+        return data.get("equipements", [])
     except Exception:
-        return set()
+        return []
+
+
+_MOTS_IGNORES = {
+    "principal", "principale", "salle", "local", "ligne", "atelier", "production",
+    "informatique", "supervision", "serveur", "centrale", "telephonique", "emballage",
+    "acces", "poste", "controle", "zone", "point",
+}
+
+
+def _code_par_nom(question_norm: str) -> str | None:
+    """Cherche un équipement par les mots de son nom (ex: 'pompe' -> P-101)."""
+    for e in sorted(_charger_equipements(), key=lambda e: len(e.get("nom", "")), reverse=True):
+        mots = [
+            w for w in re.findall(r"[a-z0-9]{4,}", _normaliser(e.get("nom", "")))
+            if w not in _MOTS_IGNORES
+        ]
+        if mots and any(m in question_norm for m in mots):
+            return e["code"].upper()
+    return None
 
 
 def extraire_informations(question: str, session: dict | None = None) -> dict:
@@ -65,7 +89,8 @@ def extraire_informations(question: str, session: dict | None = None) -> dict:
                 equipement_code = code
                 break
         else:
-            equipement_code = None
+            # sinon correspondance par nom d'équipement (ex: "pompe hydraulique")
+            equipement_code = _code_par_nom(_normaliser(question))
 
     code_erreur = None
     m = _CODE_ERREUR_RE.search(question)

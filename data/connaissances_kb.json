@@ -83,6 +83,21 @@
       "duree_estimee_min": 90
     },
     {
+      "id": "KB-MECA-02",
+      "titre": "Surchauffe pompe hydraulique",
+      "categorie": "Mécanique",
+      "equipement": "P-101",
+      "symptomes": ["surchauffe", "arret intempestif", "grippage", "bruit anormal"],
+      "procedure": [
+        "Couper la pompe et condamner le demarrage avant toute intervention",
+        "Verifier le niveau et l'etat du fluide hydraulique",
+        "Controler la filtration et l'encrassement des carters",
+        "Verifier l'alignement du moteur et l'etat des roulements",
+        "Si la surchauffe persiste, basculer sur la pompe de secours et escalader au technicien"
+      ],
+      "duree_estimee_min": 35
+    },
+    {
       "id": "KB-LOG-03",
       "titre": "Application de supervision bloquee",
       "categorie": "Logiciel",

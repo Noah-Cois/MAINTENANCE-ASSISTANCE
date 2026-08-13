@@ -57,7 +57,7 @@ puis proposer des actions (création de ticket, escalade) **soumises à validati
   via REST stdlib (zéro dépendance) quand `GEMINI_API_KEY` est définie (variable d'environnement
   ou `.env` à la racine) ; repli automatique sur la réponse déterministe si la clé est absente
   ou en cas d'erreur réseau/quota — les sources citées restent celles du RAG dans les deux modes.
-- **Données** : 3 fichiers fictifs dans `data/` (9 fiches KB, 8 équipements, 6 utilisateurs).
+- **Données** : 3 fichiers fictifs dans `data/` (10 fiches KB, 9 équipements, 6 utilisateurs).
 
 ### 5. Interface (Dev 4)
 
@@ -101,7 +101,7 @@ python3 tests/test_scenarios.py   # vérification des scénarios
 - [x] Tous les modules implémentés et testés (4 scénarios OK)
 - [x] UI Streamlit + validation humaine (app.py)
 - [x] Observabilité LangSmith/JSONL + métriques sidebar (observability.py)
-- [x] Données fictives `data/*.json` (9 fiches, 8 équipements, 6 utilisateurs)
+- [x] Données fictives `data/*.json` (10 fiches, 9 équipements, 6 utilisateurs)
 - [x] LLM optionnel : rédaction Gemini (REST stdlib, repli automatique, `.env`)
 - [ ] Optionnel : ChromaDB sur Python ≤ 3.13, garde-fous LLM avancés
 - [ ] Fusion des branches de l'équipe (binôme A : améliorations RAG/prompts, Dev 3 : LangGraph)
