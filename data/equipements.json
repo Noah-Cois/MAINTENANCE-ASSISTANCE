@@ -1,0 +1,52 @@
+[
+  {
+    "id": "SRV-WEB-01",
+    "nom": "Serveur Web Production",
+    "type": "serveur",
+    "service": "Infrastructure",
+    "statut": "en_panne",
+    "ip": "10.10.1.11",
+    "os": "Ubuntu 22.04",
+    "criticite": "haute"
+  },
+  {
+    "id": "SRV-DB-01",
+    "nom": "Serveur Base de Données",
+    "type": "serveur",
+    "service": "Infrastructure",
+    "statut": "actif",
+    "ip": "10.10.1.12",
+    "os": "Debian 12",
+    "criticite": "haute"
+  },
+  {
+    "id": "PC-COMPTA-04",
+    "nom": "Poste Comptabilité 4",
+    "type": "poste_travail",
+    "service": "Comptabilité",
+    "statut": "actif",
+    "ip": "10.20.3.14",
+    "os": "Windows 11",
+    "criticite": "basse"
+  },
+  {
+    "id": "IMP-RH-02",
+    "nom": "Imprimante RH",
+    "type": "imprimante",
+    "service": "Ressources Humaines",
+    "statut": "en_panne",
+    "ip": "10.20.5.20",
+    "os": null,
+    "criticite": "basse"
+  },
+  {
+    "id": "SW-CORE-01",
+    "nom": "Switch Réseau Principal",
+    "type": "reseau",
+    "service": "Infrastructure",
+    "statut": "actif",
+    "ip": "10.10.0.1",
+    "os": null,
+    "criticite": "critique"
+  }
+]

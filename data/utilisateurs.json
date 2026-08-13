@@ -1,0 +1,26 @@
+[
+  {
+    "identifiant": "j.dupont",
+    "nom": "Jean Dupont",
+    "service": "Comptabilité",
+    "poste": "Comptable Senior",
+    "telephone": "01 23 45 67 89",
+    "equipement_id": "PC-COMPTA-04"
+  },
+  {
+    "identifiant": "m.leroy",
+    "nom": "Marie Leroy",
+    "service": "Ressources Humaines",
+    "poste": "Chargée RH",
+    "telephone": "01 23 45 67 90",
+    "equipement_id": "IMP-RH-02"
+  },
+  {
+    "identifiant": "a.martin",
+    "nom": "Antoine Martin",
+    "service": "Infrastructure",
+    "poste": "Administrateur Système",
+    "telephone": "01 23 45 67 91",
+    "equipement_id": "SRV-WEB-01"
+  }
+]
