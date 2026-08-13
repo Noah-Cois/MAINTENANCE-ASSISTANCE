@@ -12,13 +12,30 @@ CHROMA_DIR = os.path.join(BASE_DIR, "chroma_db")
 
 class RagedService:
     def __init__(self, forcer_maj=False):
-        # Sécurité : On vérifie que le token est bien chargé avant de lancer l'API
-        if not os.environ.get("HUGGINGFACEHUB_API_TOKEN"):
-            raise ValueError("Erreur : La variable HUGGINGFACEHUB_API_TOKEN est manquante dans l'environnement.")
+        import streamlit as st
 
-        # Initialisation du modèle d'embedding en ligne gratuit
+        # 1. Récupération sécurisée du token (Streamlit Secrets prioritaire, puis .env local)
+        hf_token = None
+        try:
+            if hasattr(st, "secrets") and "HUGGINGFACEHUB_API_TOKEN" in st.secrets:
+                hf_token = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
+        except Exception:
+            pass
+            
+        if not hf_token:
+            hf_token = os.environ.get("HUGGINGFACEHUB_API_TOKEN")
+
+        # 2. Sécurité : On vérifie que le token est bien trouvé
+        if not hf_token:
+            raise ValueError("Erreur : La variable HUGGINGFACEHUB_API_TOKEN est manquante dans les secrets Streamlit ou l'environnement.")
+
+        # 3. On l'injecte dans os.environ pour que LangChain / les bibliothèques le détectent automatiquement
+        os.environ["HUGGINGFACEHUB_API_TOKEN"] = hf_token
+
+        # 4. Initialisation du modèle d'embedding en passant explicitement le token (recommandé)
         self.embeddings = HuggingFaceEndpointEmbeddings(
-            model="sentence-transformers/all-MiniLM-L6-v2"
+            model="sentence-transformers/all-MiniLM-L6-v2",
+            huggingfacehub_api_token=hf_token
         )
         self.vector_store = None
         
@@ -28,7 +45,6 @@ class RagedService:
             shutil.rmtree(CHROMA_DIR)
             
         self._charger_ou_creer_base()
-
     def _charger_ou_creer_base(self):
         """Charge la base existante ou crée une nouvelle base ChromaDB."""
         if os.path.exists(CHROMA_DIR):
