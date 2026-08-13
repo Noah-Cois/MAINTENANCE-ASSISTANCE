@@ -1,0 +1,16 @@
+[
+  {
+    "id": "KB-NET-01",
+    "titre": "Panne de connectivité réseau Wi-Fi",
+    "categorie": "Réseau",
+    "description": "Procédure en cas de perte de signal ou d'impossibilité de se connecter au point d'accès de l'entreprise.",
+    "solutions": "1. Vérifier si le commutateur principal de l'étage est alimenté. 2. Redémarrer la borne Wi-Fi concernée via l'interface d'administration. 3. Si le problème persiste, affecter le ticket à l'équipe Infrastructures Réseaux."
+  },
+  {
+    "id": "KB-SYS-02",
+    "titre": "Saturation de l'espace disque Serveur",
+    "categorie": "Système",
+    "description": "Alerte de monitoring indiquant un espace disque disponible inférieur à 5%.",
+    "solutions": "1. Exécuter le script de nettoyage des logs temporaires. 2. Identifier les fichiers volumineux obsolètes. 3. Si nécessaire, demander une extension de volume de stockage."
+  }
+]
